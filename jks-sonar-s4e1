@@ -11,7 +11,10 @@ pipeline {
 
         stage('Get Source') {
             steps {
-                checkout scm
+        
+                sh '''
+                    git clone https://github.com/aspnetrun/run-aspnetcore-basics.git
+                '''
             }
         }
 

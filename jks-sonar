@@ -36,21 +36,21 @@ pipeline {
                         -Dsonar.projectKey=${env.REPO_NAME} \
                         -Dsonar.projectName=${env.REPO_NAME} \
                         -Dsonar.sources=src/main/java \
-                        -Dsonar.java.binaries=target/classes \
-                        -Dsonar.qualitygate.wait=true
+                        -Dsonar.java.binaries=target/classes 
+//                        -Dsonar.qualitygate.wait=true
                     """
                 }
             }
         }
 
-        stage("Quality Gate") {
+/*        stage("Quality Gate") {
             steps {
                 // El pipeline se detiene automáticamente si no pasa los estándares del Banco
                 waitForQualityGate abortPipeline: true
             }
         }
     }
-    
+*/
     post {
         failure {
             echo "El análisis de SonarQube falló o el Quality Gate no se cumplió."

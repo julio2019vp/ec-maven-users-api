@@ -23,7 +23,6 @@ pipeline {
                     }
 
                     steps {
-
                         sh '''
                             rm -rf run-aspnetcore-basics
                             git clone https://github.com/aspnetrun/run-aspnetcore-basics.git
@@ -48,6 +47,7 @@ pipeline {
                     steps {
 
                         withSonarQubeEnv('sonarqube-server') {
+
                             sh '''
                                 rm -rf run-aspnetcore-basics
                                 git clone https://github.com/aspnetrun/run-aspnetcore-basics.git
@@ -58,15 +58,15 @@ pipeline {
                                 export PATH="$PATH:/root/.dotnet/tools"
 
                                 dotnet sonarscanner begin \
-                                  /k:"run-aspnetcore-basics" \
-                                  /o:"julio2019vp" \
-                                  /d:sonar.host.url="https://sonarcloud.io" \
-                                  /d:sonar.token="$SONAR_TOKEN"
+                                  /k:"$PROJECT_KEY" \
+                                  /o:"$SONAR_ORG" \
+                                  /d:sonar.host.url="$SONAR_HOST_URL" \
+                                  /d:sonar.login="$SONAR_TOKEN"
 
-                                dotnet build AspnetRunBasics.sln
+                                dotnet build AspnetRunBasics.sln --configuration Release
 
                                 dotnet sonarscanner end \
-                                  /d:sonar.token="$SONAR_TOKEN"
+                                  /d:sonar.login="$SONAR_TOKEN"
                             '''
                         }
                     }
@@ -84,7 +84,6 @@ pipeline {
             }
 
             steps {
-
                 sh '''
                     rm -rf run-aspnetcore-basics
                     git clone https://github.com/aspnetrun/run-aspnetcore-basics.git

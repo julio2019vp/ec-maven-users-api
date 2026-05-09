@@ -31,9 +31,12 @@ pipeline {
                     }
 
                     steps {
+                    
                         sh '''
-                            dotnet restore
-                            dotnet build --configuration Release
+                            cd run-aspnetcore-basics
+                    
+                            dotnet restore AspnetRunBasics.sln
+                            dotnet build AspnetRunBasics.sln --configuration Release
                         '''
                     }
                 }
@@ -47,25 +50,27 @@ pipeline {
                         }
                     }
 
-                    steps {
+                   steps {
 
                         withCredentials([
                             string(credentialsId: 'sonar_token', variable: 'SONAR_TOKEN')
                         ]) {
-
+                    
                             sh '''
+                                cd run-aspnetcore-basics
+                    
                                 dotnet tool install --global dotnet-sonarscanner
-
+                    
                                 export PATH="$PATH:/root/.dotnet/tools"
-
+                    
                                 dotnet sonarscanner begin \
                                   /k:"run-aspnetcore-basics" \
                                   /o:"julio2019vp" \
                                   /d:sonar.host.url="https://sonarcloud.io" \
                                   /d:sonar.token="$SONAR_TOKEN"
-
-                                dotnet build
-
+                    
+                                dotnet build AspnetRunBasics.sln
+                    
                                 dotnet sonarscanner end \
                                   /d:sonar.token="$SONAR_TOKEN"
                             '''
@@ -84,13 +89,15 @@ pipeline {
                 }
             }
 
-            steps {
-
+             steps {
+            
                 sh '''
-                    dotnet publish -c Release -o publish
+                    cd run-aspnetcore-basics
+            
+                    dotnet publish AspnetRunBasics.sln -c Release -o publish
                 '''
-
-                archiveArtifacts artifacts: 'publish/**', fingerprint: true
+            
+                archiveArtifacts artifacts: 'run-aspnetcore-basics/publish/**'
             }
         }
     }

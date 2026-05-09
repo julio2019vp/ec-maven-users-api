@@ -47,10 +47,7 @@ pipeline {
 
                     steps {
 
-                        withCredentials([
-                            string(credentialsId: 'jenkins_token', variable: 'SONAR_TOKEN')
-                        ]) {
-
+                        withSonarQubeEnv('sonarqube-server') {
                             sh '''
                                 rm -rf run-aspnetcore-basics
                                 git clone https://github.com/aspnetrun/run-aspnetcore-basics.git

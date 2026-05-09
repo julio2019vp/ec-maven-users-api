@@ -3,22 +3,11 @@ pipeline {
     agent any
 
     environment {
-        PROJECT_KEY = "run-aspnetcore-basics"
         SONAR_ORG = "julio2019vp"
+        PROJECT_KEY = "run-aspnetcore-basics"
     }
 
     stages {
-
-        stage('Get Source') {
-        
-            steps {
-        
-                sh '''
-                    rm -rf run-aspnetcore-basics
-                    git clone https://github.com/aspnetrun/run-aspnetcore-basics.git
-                '''
-            }
-        }
 
         stage('Build and QA') {
 
@@ -36,10 +25,12 @@ pipeline {
                     steps {
 
                         sh '''
+                            rm -rf run-aspnetcore-basics
+                            git clone https://github.com/aspnetrun/run-aspnetcore-basics.git
+
                             cd run-aspnetcore-basics
 
                             dotnet restore AspnetRunBasics.sln
-
                             dotnet build AspnetRunBasics.sln --configuration Release
                         '''
                     }
@@ -61,10 +52,12 @@ pipeline {
                         ]) {
 
                             sh '''
+                                rm -rf run-aspnetcore-basics
+                                git clone https://github.com/aspnetrun/run-aspnetcore-basics.git
+
                                 cd run-aspnetcore-basics
 
                                 dotnet tool install --global dotnet-sonarscanner
-
                                 export PATH="$PATH:/root/.dotnet/tools"
 
                                 dotnet sonarscanner begin \
@@ -96,26 +89,16 @@ pipeline {
             steps {
 
                 sh '''
+                    rm -rf run-aspnetcore-basics
+                    git clone https://github.com/aspnetrun/run-aspnetcore-basics.git
+
                     cd run-aspnetcore-basics
 
-                    dotnet publish AspnetRunBasics.sln \
-                      -c Release \
-                      -o publish
+                    dotnet publish AspnetRunBasics.sln -c Release -o publish
                 '''
 
-                archiveArtifacts artifacts: 'run-aspnetcore-basics/publish/**', fingerprint: true
+                archiveArtifacts artifacts: '**/publish/**'
             }
-        }
-    }
-
-    post {
-
-        success {
-            echo 'Pipeline ejecutado correctamente'
-        }
-
-        failure {
-            echo 'Pipeline falló'
         }
     }
 }

@@ -47,26 +47,24 @@ pipeline {
                     steps {
 
                         withSonarQubeEnv('sonarqube-server') {
-
+                        
                             sh '''
                                 rm -rf run-aspnetcore-basics
                                 git clone https://github.com/aspnetrun/run-aspnetcore-basics.git
-
+                        
                                 cd run-aspnetcore-basics
-
+                        
                                 dotnet tool install --global dotnet-sonarscanner
                                 export PATH="$PATH:/root/.dotnet/tools"
-
+                        
                                 dotnet sonarscanner begin \
                                   /k:"$PROJECT_KEY" \
                                   /o:"$SONAR_ORG" \
-                                  /d:sonar.host.url="$SONAR_HOST_URL" \
-                                  /d:sonar.login="$SONAR_TOKEN"
-
+                                  /d:sonar.host.url="$SONAR_HOST_URL"
+                        
                                 dotnet build AspnetRunBasics.sln --configuration Release
-
-                                dotnet sonarscanner end \
-                                  /d:sonar.login="$SONAR_TOKEN"
+                        
+                                dotnet sonarscanner end
                             '''
                         }
                     }

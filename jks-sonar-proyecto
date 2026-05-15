@@ -1,1 +1,98 @@
+pipeline {
 
+    agent any
+
+    environment {
+        SONAR_ORG = "julio2019vp"
+        PROJECT_KEY = "run-aspnetcore-basics"
+    }
+
+    stages {
+
+        stage('Build and QA') {
+
+            parallel {
+
+                stage('Build') {
+
+                    agent {
+                        docker {
+                            image 'mcr.microsoft.com/dotnet/sdk:8.0'
+                            args '--entrypoint="" -u root'
+                        }
+                    }
+
+                    steps {
+                        sh '''
+                            rm -rf run-aspnetcore-basics
+                            git clone https://github.com/julio2019vp/run-aspnetcore-basics.git
+
+                            cd run-aspnetcore-basics
+
+                            dotnet restore AspnetRunBasics.sln
+                            dotnet build AspnetRunBasics.sln --configuration Release
+                        '''
+                    }
+                }
+
+                stage('SonarCloud Analysis') {
+
+                    agent {
+                        docker {
+                            image 'mcr.microsoft.com/dotnet/sdk:8.0'
+                            args '--entrypoint="" -u root'
+                        }
+                    }
+
+                    steps {
+
+                        withSonarQubeEnv('sonarqube-server') {
+                        
+                            sh '''
+                                rm -rf run-aspnetcore-basics
+                                git clone https://github.com/julio2019vp/run-aspnetcore-basics.git
+                        
+                                cd run-aspnetcore-basics
+                        
+                                dotnet tool install --global dotnet-sonarscanner
+                                export PATH="$PATH:/root/.dotnet/tools"
+                        
+                                dotnet sonarscanner begin \
+                                  /k:"$PROJECT_KEY" \
+                                  /o:"$SONAR_ORG" \
+                                  /d:sonar.host.url="$SONAR_HOST_URL"
+                        
+                                dotnet build AspnetRunBasics.sln --configuration Release
+                        
+                                dotnet sonarscanner end
+                            '''
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Publish Artifact') {
+
+            agent {
+                docker {
+                    image 'mcr.microsoft.com/dotnet/sdk:8.0'
+                    args '--entrypoint="" -u root'
+                }
+            }
+
+            steps {
+                sh '''
+                    rm -rf run-aspnetcore-basics
+                    git clone https://github.com/julio2019vp/run-aspnetcore-basics.git
+
+                    cd run-aspnetcore-basics
+
+                    dotnet publish AspnetRunBasics.sln -c Release -o publish
+                '''
+
+                archiveArtifacts artifacts: '**/publish/**'
+            }
+        }
+    }
+}
